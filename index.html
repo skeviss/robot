@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>Ρομπότ: Οι μηχανές του μέλλοντος</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 922px;
+      height: 428px;
+      background-color: white;
+      font-family: "Times New Roman", serif;
+      overflow: hidden;
+    }
+    .wrapper {
+      width: 922px;
+      height: 428px;
+      padding: 10px 20px;
+      box-sizing: border-box;
+    }
+    .toolbar {
+      text-align: center;
+      margin-bottom: 8px;
+      padding: 5px 0;
+    }
+    .color-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid #999;
+      margin: 0 3px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .text {
+      font-size: 21px;
+      line-height: 1.4;
+      text-align: justify;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+      padding-right: 10px;
+    }
+    h3 {
+      font-size: 28px;
+      text-align: center;
+      color: #F39C12;
+      margin-bottom: 15px;
+    }
+    .content-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .text-content {
+      flex: 1;
+      padding-right: 20px;
+    }
+    .image-content {
+      margin-top: 0;
+    }
+    .image-content img {
+      width: 340px;
+      height: auto;
+      border: 1px solid #ddd;
+    }
+    strong {
+      font-weight: bold;
+      font-size: 22px;
+    }
+    mark.yellow { background-color: yellow; }
+    mark.green { background-color: lightgreen; }
+    mark.blue { background-color: lightblue; }
+    mark.red { background-color: lightcoral; }
+    mark { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="toolbar">
+      <span class="color-btn" style="background-color: yellow;" data-color="yellow" title="Κίτρινο"></span>
+      <span class="color-btn" style="background-color: lightgreen;" data-color="green" title="Πράσινο"></span>
+      <span class="color-btn" style="background-color: lightblue;" data-color="blue" title="Μπλε"></span>
+      <span class="color-btn" style="background-color: lightcoral;" data-color="red" title="Κόκκινο"></span>
+    </div>
+    <div id="content">
+      <h3>Ρομπότ: Οι μηχανές του μέλλοντος</h3>
+      <div class="content-wrapper">
+        <div class="text-content">
+          <div class="text">
+            Τα ρομπότ είναι έξυπνες μηχανές που λειτουργούν και ελέγχονται από ηλεκτρονικούς υπολογιστές. Στις μέρες μας, χρησιμοποιούνται σε πολλά μέρη: από εργοστάσια μέχρι σπίτια και αποστολές στο διάστημα!
+          </div>
+          <div class="text">
+            <strong>🏭 Ρομπότ στα εργοστάσια</strong>
+          </div>
+          <div class="text">
+            Στα εργοστάσια τα ρομπότ βοηθούν τους ανθρώπους να φτιάχνουν αυτοκίνητα, φάρμακα, ηλεκτρονικές συσκευές και πολλά άλλα. Μπορούν να δουλεύουν γρήγορα και με ακρίβεια, χωρίς να κουράζονται, κάνοντας δύσκολες δουλειές!
+          </div>
+        </div>
+        <div class="image-content">
+          <img src="robotergostasia.jpg" alt="Ρομπότ στα εργοστάσια"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentColor = "yellow";
+    document.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentColor = btn.dataset.color;
+      });
+    });
+
+    // Process the selection range without modifying its boundaries
+    function processRange(range) {
+      return range.cloneRange();
+    }
+
+    // More precise selection handling using the surroundContents method
+    document.addEventListener("mouseup", () => {
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) return;
+      
+      const range = selection.getRangeAt(0);
+      if (!document.getElementById("content").contains(range.commonAncestorContainer)) return;
+      
+      // Only proceed if we're not inside or overlapping an existing mark
+      let isInsideMark = false;
+      let node = range.commonAncestorContainer;
+      while (node && node !== document.body) {
+        if (node.nodeName === "MARK") {
+          isInsideMark = true;
+          break;
+        }
+        node = node.parentNode;
+      }
+      
+      if (isInsideMark) return;
+      
+      // Create a highlight
+      try {
+        const mark = document.createElement("mark");
+        mark.className = currentColor;
+        
+        // The key change: This method only wraps exactly what was selected
+        // and doesn't modify any other content
+        const rangeClone = range.cloneRange();
+        
+        // If range spans multiple nodes, we need special handling
+        if (range.startContainer !== range.endContainer ||
+            range.commonAncestorContainer.nodeType !== Node.TEXT_NODE) {
+          // For complex selections, extract the contents and put them in the mark
+          const fragment = rangeClone.extractContents();
+          mark.appendChild(fragment);
+          rangeClone.insertNode(mark);
+        } else {
+          // For simple selections (within a single text node), use surroundContents
+          rangeClone.surroundContents(mark);
+        }
+        
+        selection.removeAllRanges();
+      } catch (e) {
+        console.error("Error highlighting selection:", e);
+      }
+    });
+
+    // Handle click on highlighted text to remove the highlight
+    document.getElementById("content").addEventListener("click", function(e) {
+      if (e.target.tagName === "MARK") {
+        const span = document.createElement("span");
+        span.innerHTML = e.target.innerHTML;
+        e.target.parentNode.replaceChild(span, e.target);
+        
+        // If possible, merge adjacent text nodes for cleaner DOM
+        if (span.parentNode) {
+          span.parentNode.normalize();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
